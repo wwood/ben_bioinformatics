@@ -72,4 +72,18 @@ class SpoctopusWrapperTest < Test::Unit::TestCase
     assert_equal 31, res.signal_peptide.start
     assert_equal 45, res.signal_peptide.stop
   end
+
+  def test_reentrant
+    res = Bio::Spoctopus::Result.create_from_output([
+        '>wrapperSeq',
+        'iiiirrrrrrriiiiiiiiiiiMMMMMM
+MMMMMMMMMMMMMMMoooooooooooooooMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiiiiiMMMMMMMMMMMMMMMMMMMMMoMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiiiiiMMMMMMMMMMMM
+MMMMMMMMMooooooooooooooooooooMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiiiiiiMMMMMMMMMMMMMMMMMMMMMoooooooooooMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiMMMMMM
+MMMMMMMMMMMMMMMooooMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiiiiiiiiiiiMMMMMMMMMMMMMMMMMMMMMooooooooooooooooMMMMMMMMMMMMMMMMMMMMMiiiiiiiiiiiiiii
+iiiiiiiiiMMMMMMMMMMMMMMMMMMMMMooooo'
+      ].join("\n"))
+
+    assert_equal false, res.signal?
+    assert res.has_domain?
+  end
 end
