@@ -130,7 +130,6 @@ module Bio
 
         # deal with nothing proteins
         return tmd if seq.match(/^g*$/)
-        $stderr.puts spoctopus_output
 
         seq.scan(/S+/) do
           if tmd.signal?
