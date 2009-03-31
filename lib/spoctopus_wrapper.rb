@@ -121,7 +121,12 @@ module Bio
 
         seq = lines[1..(lines.length-1)].join('')
 
-        unless seq.match(/^[ioMgnS]+$/)
+        # Taken from http://octopus.cbr.su.se/OCTOPUS_DATA/readme
+        # and supplemented by experiment, as there doesn't seem to be one available for
+        # SPOCTOPUS, only OCTOPUS.
+        #
+        # Currently dips, hairpins, unannotated and reentrants are ignored.
+        unless seq.match(/^[ioMgnSHRrDd\.T]+$/)
           raise Exception, "Unexpected characters in SPOCTOPUS output sequence: #{seq}"
         end
 
