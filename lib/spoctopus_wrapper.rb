@@ -111,7 +111,6 @@ module Bio
       # nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnSSSSSSSSSSSSSSSooooooooooooooo
       # ooooooooooooooooooooooooooooooooooooo
       def self.create_from_output(spoctopus_output)
-        puts spoctopus_output
         # split the fasta into the real parts
         lines = spoctopus_output.split("\n")
         
