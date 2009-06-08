@@ -218,7 +218,9 @@ module Bio
 
           # deal with no tmd proteins
           if row[1] == 'No Transmembrane Domain Found'
-            transmembrane_proteins.push OrientedTransmembraneDomainProtein.new
+            prot = OrientedTransmembraneDomainProtein.new
+            prot.name = current_protein_id
+            transmembrane_proteins.push prot
             current_transmembrane_protein = nil
           else
             current_transmembrane_protein ||= OrientedTransmembraneDomainProtein.new

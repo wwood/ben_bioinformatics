@@ -133,7 +133,8 @@ pfa|PFF1525c	Unknown	188	208	outside_in'
       r = pees[1]
 
       assert r.transmembrane_type_2?
-      
+
+      assert_equal 'pfa|PFB0610c', pees[2].name
       assert_equal false, pees[2].has_domain?
 
       assert_equal 3, pees[3].transmembrane_domains.length
