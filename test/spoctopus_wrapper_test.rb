@@ -86,4 +86,57 @@ iiiiiiiiiMMMMMMMMMMMMMMMMMMMMMooooo'
     assert_equal false, res.signal?
     assert res.has_domain?
   end
+
+  def test_wrapper_read
+    Tempfile.open('spock') do |tempfile|
+      tempfile.puts ''
+      tempfile.flush
+
+      pees = Bio::Spoctopus::WrapperParser.new(tempfile.path).transmembrane_proteins
+      assert_equal [], pees
+    end
+
+    Tempfile.open('spock') do |tempfile|
+      tempfile.puts 'pfa|PFD0635c	I	1833	1853	outside_in'
+      tempfile.flush
+
+      pees = Bio::Spoctopus::WrapperParser.new(tempfile.path).transmembrane_proteins
+      assert_equal 1, pees.length
+      r = pees[0]
+      assert_equal 'pfa|PFD0635c', r.name
+      assert_equal 1, r.transmembrane_domains.length
+      t = r.transmembrane_domains[0]
+      assert_equal 1833, t.start
+      assert_equal 1853, t.stop
+      assert r.transmembrane_type_1?
+    end
+
+    Tempfile.open('spock') do |tempfile|
+      tempfile.puts 'pfa|PFD0635c	I	1833	1853	outside_in
+pfa|PFD0595c	II	2	22	inside_out
+pfa|PFB0610c	No Transmembrane Domain Found
+pfa|PFF1525c	Unknown	2	22	outside_in
+pfa|PFF1525c	Unknown	160	180	inside_out
+pfa|PFF1525c	Unknown	188	208	outside_in'
+      tempfile.flush
+
+      pees = Bio::Spoctopus::WrapperParser.new(tempfile.path).transmembrane_proteins
+      assert_equal 4, pees.length
+      r = pees[0]
+      assert_equal 'pfa|PFD0635c', r.name
+      assert_equal 1, r.transmembrane_domains.length
+      t = r.transmembrane_domains[0]
+      assert_equal 1833, t.start
+      assert_equal 1853, t.stop
+      assert r.transmembrane_type_1?
+
+      r = pees[1]
+
+      assert r.transmembrane_type_2?
+      
+      assert_equal false, pees[2].has_domain?
+
+      assert_equal 3, pees[3].transmembrane_domains.length
+    end
+  end
 end

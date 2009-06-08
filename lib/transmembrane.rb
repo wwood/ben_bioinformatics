@@ -102,6 +102,12 @@ module Transmembrane
     UNKNOWN = 'unknown'
     
     attr_accessor :orientation
+
+    def initialize(start=nil, stop=nil, orientation=nil)
+      @start = start.to_i unless start.nil?
+      @stop = stop.to_i unless stop.nil?
+      @orientation = orientation unless orientation.nil?
+    end
   end
 
   # A class to represent a protein with a signal peptide and a transmembrane

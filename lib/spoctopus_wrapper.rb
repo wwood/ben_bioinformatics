@@ -6,6 +6,7 @@ require 'tempfile'
 require 'rubygems'
 gem 'rio'
 require 'rio'
+require 'fastercsv'
 
 module Bio
   class Spoctopus
@@ -111,7 +112,7 @@ module Bio
       # nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnSSSSSSSSSSSSSSSooooooooooooooo
       # ooooooooooooooooooooooooooooooooooooo
       def self.create_from_output(spoctopus_output)
-        puts spoctopus_output
+        #        puts spoctopus_output
         # split the fasta into the real parts
         lines = spoctopus_output.split("\n")
         
@@ -179,6 +180,56 @@ module Bio
         end
 
         return tmd
+      end
+    end
+
+    # Read the output from this file when it is run as a script and return
+    # useful programmatic objects - TransmembraneProteins
+    #
+    #pfa|PFD0635c	I	1833	1853	outside_in
+    #pfa|PFD0595c	I	2	22	outside_in
+    #pfa|PFB0610c	No Transmembrane Domain Found
+    #pfa|PFF1525c	Unknown	2	22	outside_in
+    #pfa|PFF1525c	Unknown	160	180	inside_out
+    #pfa|PFF1525c	Unknown	188	208	outside_in
+    class WrapperParser
+      attr_accessor :io
+
+      def initialize(io)
+        @io = io
+      end
+
+      # Return an array of transmembrane proteins
+      def transmembrane_proteins
+        transmembrane_proteins = []
+        current_transmembrane_protein = nil
+
+        FasterCSV.foreach(@io, :col_sep => "\t") do |row|
+          next if row.length == 0
+          current_protein_id = row[0]
+          
+          # if the protein ID changes then return the last protein 
+          # (if there is one)
+          unless current_transmembrane_protein.nil? or
+              current_transmembrane_protein.name == current_protein_id
+            transmembrane_proteins.push current_transmembrane_protein
+            current_transmembrane_protein = nil
+          end
+
+          # deal with no tmd proteins
+          if row[1] == 'No Transmembrane Domain Found'
+            transmembrane_proteins.push OrientedTransmembraneDomainProtein.new
+            current_transmembrane_protein = nil
+          else
+            current_transmembrane_protein ||= OrientedTransmembraneDomainProtein.new
+            current_transmembrane_protein.name = current_protein_id
+            current_transmembrane_protein.transmembrane_domains.push OrientedTransmembraneDomain.new(row[2],row[3],row[4])
+          end
+        end
+        # push the last one
+        transmembrane_proteins.push current_transmembrane_protein unless current_transmembrane_protein.nil?
+
+        return transmembrane_proteins
       end
     end
   end
