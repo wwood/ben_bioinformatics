@@ -29,6 +29,10 @@ module Transmembrane
     def has_domain?
       !@transmembrane_domains.empty?
     end
+
+    def multiple_transmembrane_domains?
+      @transmembrane_domains.length > 1
+    end
   end
   
   class OrientedTransmembraneDomainProtein<TransmembraneProtein
