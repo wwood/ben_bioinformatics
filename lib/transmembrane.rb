@@ -1,5 +1,7 @@
 # a simple class to represent a TMD
 
+require 'array_pair'
+
 module Transmembrane
 
   class TransmembraneProtein
@@ -33,6 +35,20 @@ module Transmembrane
     def multiple_transmembrane_domains?
       @transmembrane_domains.length > 1
     end
+
+    def overlaps(another_transmembrane_protein)
+      @transmembrane_domains.pairs(another_transmembrane_protein.transmembrane_domains).collect {|t1,t2|
+        t1.intersection(t2) == () ? nil : [t1,t2]
+      }.reject {|a| a.nil?}
+    end
+
+    # return the pair of transmembrane domains that overlaps the best (ie for the longest period)
+    def best_overlap(another_transmembrane_protein)
+      max = @transmembrane_domains.pairs(another_transmembrane_protein.transmembrane_domains).collect {|t1,t2|
+        [t1.overlap_length(t2), [t1,t2]]
+      }.max {|a,b| a[0] <=> b[0]}
+      max[0] == 0 ? nil : max[1]
+    end
   end
   
   class OrientedTransmembraneDomainProtein<TransmembraneProtein
@@ -58,6 +74,13 @@ module Transmembrane
   class TransmembraneDomainDefinition
     attr_accessor :start, :stop
   
+    # A new TMD. The length is stop-start+1, so start and stop are
+    # 'inclusive'
+    def initialize(start=nil, stop=nil)
+      @start = start
+      @stop = stop
+    end
+
     def length
       @stop-@start+1
     end
@@ -79,6 +102,22 @@ module Transmembrane
       
       protein_sequence_string[(one)..(two)]
     end
+
+    # Return the number of amino acids that overlap with another
+    # transmembrane domain, or 0 if none are found
+    def overlap_length(another_transmembrane_domain_defintion)
+      intersection(another_transmembrane_domain_defintion).to_a.length
+    end
+
+    # Return a range representing the overlap of this transmembrane domain
+    # with another
+    #
+    # Code inspired by http://billsiggelkow.com/2008/8/29/ruby-range-intersection
+    def intersection(another_transmembrane_domain_defintion)
+      res = (@start..@stop).to_a & (another_transmembrane_domain_defintion.start..another_transmembrane_domain_defintion.stop).to_a
+      res.empty? ? nil : (res.first..res.last)
+    end
+    alias_method(:overlap, :intersection)
   end
   
   class ConfidencedTransmembraneDomain<TransmembraneDomainDefinition
