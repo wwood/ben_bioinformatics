@@ -6,6 +6,7 @@ module Transmembrane
 
   class TransmembraneProtein
     attr_accessor :transmembrane_domains, :name
+    include Enumerable #so each, each_with_index, etc. work
   
     def initialize
       # default no domains to empty array not nil
@@ -48,6 +49,10 @@ module Transmembrane
         [t1.overlap_length(t2), [t1,t2]]
       }.max {|a,b| a[0] <=> b[0]}
       max[0] == 0 ? nil : max[1]
+    end
+
+    def each
+      @transmembrane_domains.each{|t| yield t}
     end
   end
   

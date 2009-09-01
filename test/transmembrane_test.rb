@@ -90,6 +90,18 @@ module Transmembrane
       p2.transmembrane_domains = [tmd3]
       assert_equal nil, p1.best_overlap(p2)
     end
+
+    def test_each
+      expected = [10,6,22]
+      p = TransmembraneProtein.new
+      tmd1 = TransmembraneDomainDefinition.new(5,10)
+      tmd2 = TransmembraneDomainDefinition.new(5,6)
+      tmd3 = TransmembraneDomainDefinition.new(11,22)
+      p.transmembrane_domains = [tmd1,tmd2,tmd3]
+      p.each_with_index do |tmd, i|
+        assert_equal expected[i], tmd.stop
+      end
+    end
   end
 
   class TransmembraneProteinTest < Test::Unit::TestCase
