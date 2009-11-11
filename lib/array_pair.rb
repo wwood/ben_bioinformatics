@@ -1,8 +1,17 @@
+require 'rsruby'
+
 class Object
   def pick(*method_symbols)
     method_symbols.collect do |symbol|
       self.send(symbol)
     end
+  end
+end
+
+class String
+  def wrap(col=80)
+    gsub(/(.{1,#{col}})( +|$\n?)|(.{1,#{col}})/,
+      "\\1\\3\n") 
   end
 end
 
@@ -159,8 +168,14 @@ class Array
   # ['a','bc'] => "('a','bc')" 
   def to_sql_in_string
     return '()' if empty?
-    
     return "('#{join("','")}')"
+  end
+
+  # For SQL conditions. In [] brackets, single quotes don't work.
+  # ['a','bc'] => "(a,bc)"
+  def to_sql_in_string_no_quotes
+    return '()' if empty?
+    return "(#{join(",")})"
   end
 
 
@@ -174,6 +189,11 @@ class Array
     end
   end
 
+  def standard_deviation
+    return nil if empty?
+    RSRuby.instance.sd(self)
+  end
+
   # Similar to pairs(another_array) iterator, in that you iterate over 2
   # pairs of elements. However, here only the one array (the 'this' Enumerable)
   # and the names of these are from the names
@@ -184,6 +204,22 @@ class Array
           yield e1, e2
         end
       end
+    end
+  end
+
+  # like uniq -c for unix
+  def uniq_count
+    hash = {}
+    each do |e|
+      hash[e] ||= 0
+      hash[e] += 1
+    end
+    hash
+  end
+
+  def no_nils
+    reject do |element|
+      element.nil?
     end
   end
 end

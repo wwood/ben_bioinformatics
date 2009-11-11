@@ -6,7 +6,9 @@
 $:.unshift File.join(File.dirname(__FILE__),'..','lib')
 
 require 'test/unit'
+require 'rubygems'
 require 'array_pair'
+
 
 class ArrayPairTest < Test::Unit::TestCase
   def test_within
@@ -89,5 +91,18 @@ class ArrayPairTest < Test::Unit::TestCase
     assert_equal [1,3], gained[1]
     assert_equal [2,3], gained[2]
     assert_equal 3, gained.length
+  end
+
+  def test_standard_deviation
+    assert_nil [].standard_deviation
+    assert_equal 1.0, [1,2,3].standard_deviation
+    assert_equal 1.29, [1,2,3,4].standard_deviation.round(2)
+  end
+
+  def test_uniq_count
+    assert_equal({}, [].uniq_count)
+    assert_equal({'a' => 1}, ['a'].uniq_count)
+    assert_equal({'a' => 2}, ['a','a'].uniq_count)
+    assert_equal({'a' => 2, 'b' => 1}, ['a','b','a'].uniq_count)
   end
 end
